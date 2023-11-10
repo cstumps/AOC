@@ -142,7 +142,17 @@ def main( argv ):
     #        Recipe( "7 A, 1 C => 1 D" ),
     #        Recipe( "7 A, 1 D => 1 E" ),
     #        Recipe( "7 A, 1 E => 1 FUEL" ) ]
-    #
+    
+    #rec = [ Recipe( "157 ORE => 5 NZVS" ),
+    #        Recipe( "165 ORE => 6 DCFZ" ),
+    #        Recipe( "44 XJWVT, 5 KHKGT, 1 QDVJ, 29 NZVS, 9 GPVTF, 48 HKGWZ => 1 FUEL" ),
+    #        Recipe( "12 HKGWZ, 1 GPVTF, 8 PSHF => 9 QDVJ" ),
+    #        Recipe( "179 ORE => 7 PSHF" ),
+    #        Recipe( "177 ORE => 5 HKGWZ" ),
+    #        Recipe( "7 DCFZ, 7 PSHF => 2 XJWVT" ),
+    #        Recipe( "165 ORE => 2 GPVTF" ),
+    #        Recipe( "3 DCFZ, 7 NZVS, 5 HKGWZ, 10 PSHF => 8 KHKGT" ) ]
+
     #for r in rec:
     #    recipeList[ r.output ] = r
 
@@ -156,7 +166,7 @@ def main( argv ):
 
     ####
     # Part 1
-    ore = makeMaterial( 'FUEL', 1, recipeList )
+    ore, _ = makeMaterial( 'FUEL', 1, recipeList )
 
     print( "Part 1 ORE needed: %s" % ore )
     ####
@@ -164,58 +174,34 @@ def main( argv ):
     ####
     # Part 2
 
-    digits = "0999999999999"
+    # This worked well:  We pick a starting multiplier high enough then zero
+    # in on the answer.
+
     oreAvailable = 1000000000000
+    fuelTarget = math.floor( oreAvailable / ore )
+    oreNeeded = 0
+    multiplier = 2**16
 
-    for i in range( 11, 0, -1 ):
-        print( digits )
-        for j in range( 9, 0, -1 ):
-            testVal = str( ((10**i) * j) )
-            testVal = int( digits[ :(11 - i) ] + testVal )
+    while True:
+        oreNeeded, _ = makeMaterial( 'FUEL', fuelTarget + multiplier, recipeList )
 
-            print( "trying: %s" % testVal )
-
-            oreNeeded = makeMaterial( 'FUEL', testVal, recipeList )
-
-            if oreNeeded <= oreAvailable: # We've gone too far, actual val is one less
-                #digits[ i ] = str( j )
-                digits = digits[ :(i-1) ] + str( j ) + digits[ i: ]
-                break # Next digit
+        if oreNeeded > oreAvailable:
+            if multiplier == 1:
+                break
+            else:
+                multiplier = math.floor( multiplier / 2 )
         else:
-            #digits[ i ] = '0'
-            digits = digits[ :(i-1) ] + '0' + digits[ i: ]
+            fuelTarget += multiplier
 
-    # Maybe try dividing out again.  Then call makeMaterial that number of times
-    # The result from that will be the populated supplies dictionary which we can
-    # then consule to see how many more FUEL we can produce?  Will executing that 
-    # function a few million times take too long?
-
-    #orePerFuel   = ore
-    #fuelCreated  = 0
-
-    #while oreAvailable > 0:
-    #    oreAvailable -= makeMaterial( 'FUEL', 1, recipeList, supplies )
-    #    print( oreAvailable )
-    #    fuelCreated += 1
-
-    #baseFuel = math.floor( oreAvailable / orePerFuel )
-    #print( baseFuel )
-
-    #oreLeft = makeMaterial( 'FUEL', 11788286, recipeList )
-    #while makeMaterial( 'FUEL', baseFuel, recipeList ) < oreAvailable:
-    #    baseFuel += 1
-
-    # ((10^digit loc) * digit to try) + previously found digits
-
-    #print( "Part 2 FUEL created: %s" % fuelCreated )
+    print( fuelTarget )
     ####
 
     return 0
 
 # Assume no starting supplies
 def makeMaterial( mat, amount, recipes ):
-    supplies = {}
     orders   = queue.Queue()
+    supplies = {}
     ore      = 0
 
     # Add the order for material to the list
@@ -246,7 +232,7 @@ def makeMaterial( mat, amount, recipes ):
             # Store any left over materials
             supplies[ order[ 'material' ] ] = (rec.quantity * batches) - needed
 
-    return ore
+    return ore, supplies
 
 class Recipe( object ):
     def __init__( self, recipe ):
