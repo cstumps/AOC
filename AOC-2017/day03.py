@@ -73,8 +73,8 @@ import math
 
 def main( argv ):
 
-	d = part_1( 368078 )
-	v = part_2( 368078 )
+	d = part_1( 277678 )
+	v = part_2( 277678 )
 
 	print( "Distance: %s" % d )
 	print( "First val: %s" % v )
@@ -165,7 +165,7 @@ def part_2( target ):
 				x += 1
 				dir = 'r'
 
-	print('\n'.join([''.join(['{:6}'.format(item) for item in row]) for row in grid]))
+	#print('\n'.join([''.join(['{:6}'.format(item) for item in row]) for row in grid]))
 
 	return val
 

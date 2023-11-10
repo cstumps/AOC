@@ -72,7 +72,7 @@ def main( argv ):
 
 	nodes = {}
 
-	with open( "input/day07-test.txt", "r" ) as f:
+	with open( "input/day07-input.txt", "r" ) as f:
 		data = f.readlines()
 
 	# { name: { weight, [ children ] } }

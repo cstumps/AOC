@@ -87,7 +87,7 @@ def part_1( input ):
 	for line in input:
 		# Format and convert to integers
 		line = line.strip().split( '\t' )
-		line = map( int, line )
+		line = list( map( int, line ) )
 
 		mx = max( line )
 		mn = min( line )

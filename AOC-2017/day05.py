@@ -64,23 +64,21 @@ def main( argv ):
 		data = f.read().splitlines()
 
 	# Convert to integers
-	data = map( int, data )
+	data = list( map( int, data ) )
 
-	jumps = part_1( data )
-
-	print( "Jumps taken:  %s" % jumps )
+	print( "Part 1 answer: %s" % runJumps( data.copy() ) )
+	print( "Part 2 answer: %s" % runJumps( data.copy(), 3 ) )
 	
-
-def part_1( data ):
+def runJumps( data, decVal=999 ):
 	
 	jumps = 0
 	index = 0
 
-	while index < len( data ):
+	while index < len( data ) and index >= 0:
 		old_index = index
 		index += data[ index ]
 
-		if data[ old_index ] >= 3:
+		if data[ old_index ] >= decVal:
 			data[ old_index ] -= 1
 		else:
 			data[ old_index ] += 1
@@ -89,11 +87,6 @@ def part_1( data ):
 
 	return jumps
 	
-
-def part_2( data ):
-
-	return 0
-
 
 if __name__ == "__main__":
 	main( argv = sys.argv )

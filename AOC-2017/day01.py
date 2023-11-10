@@ -76,7 +76,7 @@ import sys
 def main( argv ):
 
 	with open( "input/day01-input.txt", "r" ) as f:
-		data = f.read()
+		data = f.read().strip()
 
 	p1 = part_1( data )
 	p2 = part_2( data )
@@ -102,7 +102,7 @@ def part_1( input ):
 def part_2( input ):
 	total = 0
 	start = 0
-	end = (len( input ) / 2)
+	end = int( len( input ) / 2 )
 
 	for i in range( len( input ) ):
 		if input[ start ] == input[ end ]:

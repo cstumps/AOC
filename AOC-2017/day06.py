@@ -72,7 +72,7 @@ def main( argv ):
 		data = f.read()
 
 	# Convert to integers
-	data = map( int, data.split() )
+	data = list( map( int, data.split() ) )
 
 	p1, d2 = part_1( data )
 
