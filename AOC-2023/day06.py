@@ -98,6 +98,30 @@
 # Determine the number of ways you could beat the record in each race. What do
 # you get if you multiply these numbers together?
 
+# --- Part Two ---
+
+# As the race is about to start, you realize the piece of paper with race times
+# and record distances you got earlier actually just has very bad kerning.
+# There's really only one race - ignore the spaces between the numbers on each
+# line.
+
+# So, the example from before:
+
+# Time:      7  15   30
+# Distance:  9  40  200
+
+# ...now instead means this:
+
+# Time:      71530
+# Distance:  940200
+
+# Now, you have to figure out how many ways there are to win this single race.
+# In this example, the race lasts for 71530 milliseconds and the record distance
+# you need to beat is 940200 millimeters. You could hold the button anywhere
+# from 14 to 71516 milliseconds and beat the record, a total of 71503 ways!
+
+# How many ways can you beat the record in this one much longer race?
+
 import sys
 
 def main( argv ):
@@ -106,23 +130,44 @@ def main( argv ):
     with open( "input/day06-input.txt", "r" ) as f:
         data = [ line.rstrip( '\n' ) for line in f ]
 
-    data = [ 'Time:      7  15   30',
-             'Distance:  9  40  200' 
-             ';/\]
-             data[ 0 ].split()[ 1: ]
-
+    #data = [ 'Time:      7  15   30',
+    #         'Distance:  9  40  200' ]
+    
     ##
     # Part 1
     ##
 
-    # print( f"Part 1 answer: {score}" )
+    raceTimes     = list( map( int, data[ 0 ].split()[ 1: ] ) )
+    raceDistances = list( map( int, data[ 1 ].split()[ 1: ] ) )
+
+    waysToWin = [ findMargin( t, d ) for t, d in zip( raceTimes, raceDistances ) ]
+
+    margin = 1
+
+    for w in waysToWin:
+        margin *= w
+
+    print( f"Part 1 answer: {margin}" )
 
     ##
     # Part 2
     ##
 
-    # print( f"Part 2 answer: {scratchCards}" )
+    raceTime = int( ''.join( data[ 0 ].split()[ 1: ] ) )
+    raceDistance = int( ''.join( data[ 1 ].split()[ 1: ] ) )
+
+    waysToWin = findMargin( raceTime, raceDistance )
+
+    print( f"Part 2 answer: {waysToWin}" )
+
+
+def findMargin( t, d ):
+    for i in range( t ):
+        if i * (t - i ) > d:
+            return t - (i * 2) + 1
+    else:
+        return 0
 
 
 if __name__ == "__main__":
-    main( argv=sys.argv )N
+    main( argv=sys.argv )
