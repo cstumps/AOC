@@ -4,8 +4,8 @@ import sys
 def main( argv ):
 
     # Read in input file and add up the sums
-    with open( "input/day1-input.txt", "r" ) as f:
-        data = f.readlines()
+    with open( "input/day01-input.txt", "r" ) as f:
+        data = [ line.rstrip( '\n' ) for line in f ]
 
     ##
     # Part 1
