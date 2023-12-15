@@ -217,9 +217,8 @@ def cycleGrid( grid ):
     grid = np.vstack( [ tiltCol( c ) for c in np.rot90( grid, k=-1 ) ] )
     grid = np.vstack( [ tiltCol( c ) for c in np.rot90( grid, k=-1 ) ] )
     grid = np.vstack( [ tiltCol( c ) for c in np.rot90( grid, k=-1 ) ] )
-    grid = np.rot90( grid, k=-1 )
 
-    return grid
+    return np.rot90( grid, k=-1 )
 
 def findLoad( grid ):
     locs = np.where( np.flipud( grid ) == 1 )
@@ -234,7 +233,27 @@ def convertElement( e ):
         return -1
     elif e == 'O':
         return 1
-    
+
+
+# I was pretty pleased with my solution... then I saw the one below.  This was a great idea:
+# string replace to move the rocks and map to apply the function to all the rows.  I still
+# don't use the star (*) function enough.  The below is just for part 1.  He did part 2 by
+# expanding on this but did not post it.
+# 
+# def move(d):
+#     for _ in range(100):
+#         d = map(lambda s: s.replace('.O', 'O.'), d)
+#     return d
+
+# def tilt(d):
+#     return map(''.join, zip(*d))
+
+# def load(d):
+#     return sum(i*(c=='O') for col in d
+#         for i,c in enumerate(col[::-1], 1))
+
+# print(load(move(tilt(open('data.txt'))))) 
+
 
 if __name__ == "__main__":
     main( argv=sys.argv )
