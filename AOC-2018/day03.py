@@ -88,34 +88,23 @@ def main( argv ):
     #         '#2 @ 3,1: 4x4',
     #         '#3 @ 5,5: 2x2' ]
 
-    claims = []
+    rects = []
 
     for line in data:
-        line = line.split()
-
-        coord = line[ 2 ].split( ',' )
-        dim = line[ 3 ].split( 'x' )
-
-        x = int( coord[ 0 ] )
-        y = int( coord[ 1 ][ :-1 ] )
-
-        width = int( dim[ 0 ] )
-        height = int( dim[ 1 ] )
-
-        claims.append( [ x, y, width, height, line[ 0 ][ 1: ] ] )
+        i, _, pos, size = line.split()
+        rects.append( Rect( int( i[ 1: ] ), *map( int, pos[ :-1 ].split( ',' ) ), *map( int, size.split( 'x' ) ) ) )
 
     ##
     # Part 1
     ##
 
     fabric = np.zeros( (10000, 10000) )
-    #fabric = np.zeros( (8, 8) )
 
     # Plot the rectangles
-    for claim in claims:
-        for w in range( claim[ 2 ] ):
-            for h in range( claim[ 3 ] ):
-                fabric[ h + claim[ 1 ], w + claim[ 0 ] ] += 1
+    for r in rects:
+        for w in range( r.width ):
+            for h in range( r.height ):
+                fabric[ h + r.y1, w + r.x1 ] += 1
 
     count = 0
 
@@ -128,35 +117,44 @@ def main( argv ):
     # Part 2
     ##
 
-    overlapClaims = set()
+    overlaps = set()
 
-    for c1, c2 in combinations( claims, 2 ):
-        if checkOverlap( c1, c2 ):
-            print( "Got this far" )
-            overlapClaims.add( c1[ 4 ] )
-            overlapClaims.add( c2[ 4 ] )
+    for r1, r2 in combinations( rects, 2 ):
+        if r1.overlap( r2 ):
+            overlaps.add( r1 )
+            overlaps.add( r2 )
 
-    allClaims = set( c[ 4 ] for c in claims )
+    print( f"Part 2 answer: {list(set( rects ) - overlaps)[ 0 ].id}" )
 
-    print( f"Part 2 answer: { overlapClaims}" )
+class Rect:
+    def __init__( self, id, x, y, width, height ):
+        self.id = id
 
-def checkOverlap( c1, c2 ):
-    l1 = (c1[ 0 ], c1[ 1 ])
-    r1 = (c1[ 0 ] + c1[ 2 ], c1[ 1 ] + c1[ 3 ])
+        self.x1 = x
+        self.y1 = y
 
-    l2 = (c2[ 0 ], c2[ 1 ])
-    r2 = (c2[ 0 ] + c2[ 2 ], c2[ 1 ] + c2[ 3 ])
+        self.x2 = x + width
+        self.y2 = y + height
 
-    if l1[ 0 ] == r1[ 0 ] or l1[ 1 ] == r1[ 1 ] or r2[ 0 ] == l2[ 0 ] or l2[ 1 ] == r2[ 1 ]:
-        return False
+        self.width = width
+        self.height = height
+
+    def __eq__( self, other ):
+        return (self.x1 == other.x1) and (self.width == other.width) and (self.height == other.height)
+
+    def __hash__( self ):
+        return self.id
+
+    def __str__( self ):
+        return f"{self.x1},{self.y1} -> {self.width}x{self.height}"
     
-    if l1[ 0 ] > r2[ 0 ] or l2[ 0 ] > r1[ 0 ]:
-        return False
-    
-    if r1[ 1 ] > l2[ 1 ] or r2[ 1 ] > l1[ 1 ]:
-        return False
-    
-    return True
+    def overlap( self, other ):
+        if (other.x1 >= self.x2) or (other.x2 <= self.x1):
+            return False
+        elif (other.y1 >= self.y2) or (other.y2 <= self.y1):
+            return False
+        
+        return True
 
 if __name__ == "__main__":
     main( argv=sys.argv )
