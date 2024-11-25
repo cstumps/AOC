@@ -65,72 +65,156 @@
 # Before you're ready to help them, you need to make sure your information is
 # correct. What is the name of the bottom program?
 
+# --- Part Two ---
+
+# The programs explain the situation: they can't get down. Rather, they could
+# get down, if they weren't expending all of their energy trying to keep the
+# tower balanced. Apparently, one program has the wrong weight, and until it's
+# fixed, they're stuck here.
+
+# For any program holding a disc, each program standing on that disc forms a
+# sub-tower. Each of those sub-towers are supposed to be the same weight, or the
+# disc itself isn't balanced. The weight of a tower is the sum of the weights of
+# the programs in that tower.
+
+# In the example above, this means that for ugml's disc to be balanced, gyxo,
+# ebii, and jptl must all have the same weight, and they do: 61.
+
+# However, for tknk to be balanced, each of the programs standing on its disc
+# and all programs above it must each match. This means that the following sums
+# must all be the same:
+
+#     ugml + (gyxo + ebii + jptl) = 68 + (61 + 61 + 61) = 251
+#     padx + (pbga + havc + qoyq) = 45 + (66 + 66 + 66) = 243
+#     fwft + (ktlj + cntj + xhth) = 72 + (57 + 57 + 57) = 243
+
+# As you can see, tknk's disc is unbalanced: ugml's stack is heavier than the
+# other two. Even though the nodes above ugml are balanced, ugml itself is too
+# heavy: it needs to be 8 units lighter for its stack to weigh 243 and keep the
+# towers balanced. If this change were made, its weight would be 60.
+
+# Given that exactly one program is the wrong weight, what would its weight need
+# to be to balance the entire tower?
+
 import sys
-import math
 
 def main( argv ):
 
-	nodes = {}
-
+    # Read in input file and add up the sums
 	with open( "input/day07-input.txt", "r" ) as f:
-		data = f.readlines()
-
-	# { name: { weight, [ children ] } }
-	for line in data:
-		name = line.split()[ 0 ].strip()
-		weight = line.split()[ 1 ].strip( '()' )
-
-		if len( line.split() ) > 2:
-			children = line.split( "->" )[ 1 ].strip().split( ', ' )
-		else:
-			children = []
-
-		nodes[ name ] = { 'weight': weight, 'children': children }
-
-	#print nodes
-
-	p1 = part_1( nodes )
-	p2 = part_2( data )
-
-
-def part_1( data ):
-
-	# Start the tree with a name
-	name = data.keys()[ 0 ]
-	t = Tree( name, data[ name ][ 'weight' ] )
-
-	return 0
+		data = [ line.rstrip( '\n' ) for line in f ]
+             
+	#data = [ 'pbga (66)',
+	#		 'xhth (57)',
+	#		 'ebii (61)',
+	#		 'havc (66)',
+	#		 'ktlj (57)',
+	#		 'fwft (72) -> ktlj, cntj, xhth',
+	#		 'qoyq (66)',
+	#		 'padx (45) -> pbga, havc, qoyq',
+	#		 'tknk (41) -> ugml, padx, fwft',
+	#		 'jptl (61)',
+	#		 'ugml (68) -> gyxo, ebii, jptl',
+	#		 'gyxo (61)',
+	#		 'cntj (57)' ]
 	
+	weights = { l.split()[ 0 ].strip(): int( l.split()[ 1 ][ 1:-1 ] ) for l in data }
+	parents = { l.split()[ 0 ].strip(): l.split( ' -> ' )[ 1 ].split( ', ' ) for l in data if '->' in l }
 
-def part_2( data ):
+    ##
+    # Part 1
+    ##
 
-	return 0
+	# The root node will be the one that does not appear as a child to any others
+	for p in parents.keys():
+		for c in parents.values():
+			if p in c:
+				break
+		else:
+			root = p
 
+	print( f"Part 1 answer: {root}" )
 
-class Tree:
+    ##
+    # Part 2
+    ##
 
+	# Not my most impressive work but it does arrive at the correct answer.
+
+	tree = createTree( root, parents, weights )
+
+	print( f"Part 2 answer: {findUnbalanced( tree, 0 )}" )
+
+def createTree( nodeName, parents, weights ):
+	# Create the subtree
+	node = Node( nodeName, weights[ nodeName ] )
+
+	# Add the children recursively
+	if nodeName in parents.keys(): # Has children
+		for child in parents[ nodeName ]:
+			node.addChild( createTree( child, parents, weights ) )
+
+	# Return the subtree to the parent
+	return node
+
+def findUnbalanced( tree, offset ):
+	bal, off = isBalanced( tree )
+
+	if bal == None:
+		return tree.weight + offset
+	else:
+		return findUnbalanced( bal, off )
+
+# Check to see if tree is balanced and returns sub tree that is not balanced if false
+# Returns None if balanced.
+def isBalanced( tree ):
+	weights = {}
+
+	# Tally up the weights
+	for subtree in tree.children:
+		weight = findWeight( subtree )
+
+		if weight in weights.keys():
+			weights[ weight ].append( subtree )
+		else:
+			weights[ weight ] = [ subtree ]
+
+	# See which weights only occurred once
+	oneWeight = None
+	offset = 0
+
+	# This assumes that there is only 1 weight that is different in the subtrees
+	for weight in weights.keys():
+		if len( weights[ weight ] ) == 1:
+			oneWeight = weights[ weight ][ 0 ]
+			
+			if weight == max( weights.keys() ):
+				offset = min( weights.keys() ) - max( weights.keys() )
+			else:
+				offset = max( weights.keys() ) - min( weights.keys() )
+
+	return oneWeight, offset
+
+def findWeight( tree ):
+	w = tree.weight
+
+	for subtree in tree.children:
+		w += findWeight( subtree )
+
+	return w
+
+class Node( object ):
 	def __init__( self, name, weight ):
 		self.name = name
 		self.weight = weight
 		self.children = []
 
-	def add_child( self, parent, child, weight ):
-		# We are the parent node, add the child
-		if parent == self.name:
-			# Make sure the child doesn't already exist
-			for c in children:
-				if c.name == child:
-					break
-			# New child, add in
-			else:
-				children.append( Tree( child, weight ) )
+	def __str__( self ):
+		return self.name
 
-		# Try our children
-		else:
-			for c in children:
-				c.add_child( parent, child, weight )
+	def addChild( self, obj ):
+		self.children.append( obj )
 
 
 if __name__ == "__main__":
 	main( argv = sys.argv )
-
